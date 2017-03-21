@@ -1,7 +1,7 @@
 const assert = require('chai').assert
 const request = require('request')
 
-const server = require('../lib/server')
+const server = require('../server')
 
 describe('QS-Server', () => {
   before((done) => {
@@ -24,7 +24,27 @@ describe('QS-Server', () => {
     assert(server)
   })
 
-
+  describe('POST /api/foods', () => {
+    beforeEach(() => {
+      server.locals.foods = []
+    })
+    it('should store the submitted food item', (done) => {
+      const newFood = {name: 'NewName', calories: 'NewCalories'}
+      this.request.post('/api/foods', {form: newFood}, (error, response) => {
+        if (error) { done(error) }
+        addedToFoods = server.locals.foods[0]
+        assert.equal(response.statusCode, 200)
+        assert.equal(server.locals.foods.length, 1)
+        assert.equal(addedToFoods.name, newFood.name)
+        assert.equal(addedToFoods.calories, newFood.calories)
+        requestResponse = JSON.parse(response.body)
+        assert.equal(requestResponse.id, addedToFoods.id)
+        assert.equal(requestResponse.name, addedToFoods.name)
+        assert.equal(requestResponse.calories, addedToFoods.calories)
+        done()
+      })
+    })
+  })
 
   describe('GET /api/foods', () => {
     it('should return all foods items', (done) => {
