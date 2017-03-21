@@ -47,7 +47,6 @@ describe('QS-Server', () => {
     it('should return JSON with error if food details are missing', (done) => {
       this.request.post('/api/foods', (error, response) => {
         if (error) { done(error) }
-        // assert.equal(response.statusCode, 422)
         const message = JSON.parse(response.body)
         console.log(message)
         assert.equal(message.status, 422)
