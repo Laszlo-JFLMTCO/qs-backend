@@ -24,18 +24,19 @@ describe('QS-Server', () => {
     assert(server)
   })
 
+
+
   describe('GET /api/foods', () => {
     it('should return all foods items', (done) => {
       const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
       server.locals.foods = [food]
       this.request.get('/api/foods', (error, response) => {
-        console.log('sdfsdfsdfsdf');
         if (error) { done(error) }
         foods = JSON.parse(response.body)
         assert.equal(foods.length, 1)
-        assert.equal(foods.first.id, food.id)
-        assert.equal(foods.first.name, food.name)
-        assert.equal(foods.first.calories, food.calories)
+        assert.equal(foods[0].id, food.id)
+        assert.equal(foods[0].name, food.name)
+        assert.equal(foods[0].calories, food.calories)
       done()
       })
     })
