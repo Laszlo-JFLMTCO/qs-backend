@@ -1,0 +1,22 @@
+{
+  "name": "qs-backend",
+  "version": "1.0.0",
+  "description": "backend implementation for QS FE project",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Laszlo Balogh",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "request": "^2.81.0"
+  },
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
