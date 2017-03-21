@@ -32,15 +32,26 @@ describe('QS-Server', () => {
       const newFood = {name: 'NewName', calories: 'NewCalories'}
       this.request.post('/api/foods', {form: newFood}, (error, response) => {
         if (error) { done(error) }
-        addedToFoods = server.locals.foods[0]
+        const addedToFoods = server.locals.foods[0]
         assert.equal(response.statusCode, 200)
         assert.equal(server.locals.foods.length, 1)
         assert.equal(addedToFoods.name, newFood.name)
         assert.equal(addedToFoods.calories, newFood.calories)
-        requestResponse = JSON.parse(response.body)
+        const requestResponse = JSON.parse(response.body)
         assert.equal(requestResponse.id, addedToFoods.id)
         assert.equal(requestResponse.name, addedToFoods.name)
         assert.equal(requestResponse.calories, addedToFoods.calories)
+        done()
+      })
+    })
+    it('should return JSON with error if food details are missing', (done) => {
+      this.request.post('/api/foods', (error, response) => {
+        if (error) { done(error) }
+        // assert.equal(response.statusCode, 422)
+        const message = JSON.parse(response.body)
+        console.log(message)
+        assert.equal(message.status, 422)
+        assert.equal(message.details, 'Food detail missing')
         done()
       })
     })
