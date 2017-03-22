@@ -122,11 +122,26 @@ describe('QS-Server', () => {
   })
 
   describe('DELETE /api/foods/:id', () => {
-    before(() => {
-      const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
+    before((done) => {
+      food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
       server.locals.foods = [food]
+      setTimeout(() => {
+        food = {id: Date.now(), name: 'SecondFoodName', calories: 'SecondFoodCalories'}
+        server.locals.foods.push(food)
+        done()
+      }, 50)
     })
-    it('should update food with specific ID', (done) => {
+    it('should delete food with specific ID when foods list has TWO items', (done) => {
+      foodToDelete = server.locals.foods[0]
+      const requestPath = '/api/foods/' + foodToDelete.id
+      this.request.delete(requestPath, (error, response) => {
+        if (error) { done(error) }
+        assert.equal(response.statusCode, 200)
+        assert.equal(server.locals.foods.length, 1)
+        done()
+      })
+    })
+    it('should delete food with specific ID when foods list has ONE item', (done) => {
       foodToDelete = server.locals.foods[0]
       const requestPath = '/api/foods/' + foodToDelete.id
       this.request.delete(requestPath, (error, response) => {

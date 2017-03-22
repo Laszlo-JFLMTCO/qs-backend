@@ -54,7 +54,7 @@ function updateFoodItem(newFoodDetails, requestedId){
 
 function deleteFoodItem(requestedId){
   const indexOfFoodToDelete = findFoodIndex(findFood(requestedId))
-  server.locals.foods.splice(indexOfFoodToDelete)
+  server.locals.foods.splice(indexOfFoodToDelete, 1)
   return server.locals.foods.length
 }
 
@@ -89,8 +89,9 @@ server.put('/api/foods/:id', (request, response) => {
 })
 
 server.delete('/api/foods/:id', (request, response) => {
-  const foodCountBeforeDelete = server.locals.foods
-  if (foodCountBeforeDelete - deleteFoodItem(request.params.id)) {
+  const foodCountBeforeDelete = server.locals.foods.length
+  const foodCountAfterDelete = deleteFoodItem(request.params.id)
+  if ((foodCountBeforeDelete - foodCountAfterDelete) === 1) {
     return response.sendStatus(200)
   } else {
     return response.sendStatus(500)
