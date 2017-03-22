@@ -58,6 +58,14 @@ describe('QS-Server', () => {
         done()
       })
     })
+    it('should return HTTP status 404 for invalid id', (done) => {
+      const requestPath = '/api/foods/invalid'
+      this.request.get(requestPath, (error, response) => {
+        if (error) { done(error) }
+        assert.equal(response.statusCode, 404)
+        done()
+      })
+    })
   })
 
   describe('POST /api/foods', () => {
@@ -86,6 +94,28 @@ describe('QS-Server', () => {
         const message = JSON.parse(response.body)
         assert.equal(message.status, 422)
         assert.equal(message.details, 'Food detail missing')
+        done()
+      })
+    })
+  })
+
+  describe('PUT /api/foods/:id', () => {
+    before(() => {
+      const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
+      server.locals.foods = [food]
+    })
+    it('should update food with specific ID', (done) => {
+      foodToUpdate = server.locals.foods[0]
+      foodToUpdate.name = "UpdatedName"
+      foodToUpdate.calories = "UpdatedCalories"
+      const requestPath = '/api/foods/' + foodToUpdate.id
+      this.request.put(requestPath, {form: foodToUpdate}, (error, response) => {
+        if (error) { done(error) }
+        returnedFood = JSON.parse(response.body)
+        assert.equal(response.statusCode, 200)
+        assert.equal(returnedFood.id, foodToUpdate.id)
+        assert.equal(returnedFood.name, foodToUpdate.name)
+        assert.equal(returnedFood.calories, foodToUpdate.calories)
         done()
       })
     })

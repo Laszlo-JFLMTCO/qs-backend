@@ -30,8 +30,28 @@ function addToFoods(newFoodDetails){
   return server.locals.foods[server.locals.foods.length - 1]
 }
 
+function findFood(requestedId){
+  result = null
+  server.locals.foods.forEach((food) => {
+    if (food.id == requestedId) {
+      result = food
+    }
+  })
+  return result
+}
+
 server.get('/api/foods', (request, response) => {
   response.status(200).json(server.locals.foods)
+})
+
+server.get('/api/foods/:id', (request, response) => {
+  const searchResult = findFood(request.params.id)
+  console.log(searchResult)
+  if (searchResult) {
+    return response.status(200).json(searchResult)
+  } else {
+    return response.sendStatus(404)
+  }
 })
 
 server.post('/api/foods', (request, response) => {
