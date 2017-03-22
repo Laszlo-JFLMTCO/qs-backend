@@ -17,9 +17,10 @@ if (!module.parent) {
   })
 }
 
-function newFood(newFoodDetails){
+function newFood(newFoodDetails, requestedId){
+  const newId = requestedId || Date.now()
   return {
-    id: Date.now(),
+    id: newId,
     name: newFoodDetails.name,
     calories: newFoodDetails.calories
   }
@@ -40,13 +41,29 @@ function findFood(requestedId){
   return result
 }
 
+function findFoodIndex(food){
+  return server.locals.foods.indexOf(food)
+}
+
+function updateFoodItem(newFoodDetails, requestedId){
+  const updatedFood = newFood(newFoodDetails, requestedId)
+  const indexOfUpdatedFood = findFoodIndex(findFood(requestedId))
+  server.locals.foods[indexOfUpdatedFood] = updatedFood
+  return server.locals.foods[indexOfUpdatedFood]
+}
+
+function deleteFoodItem(requestedId){
+  const indexOfFoodToDelete = findFoodIndex(findFood(requestedId))
+  server.locals.foods.splice(indexOfFoodToDelete)
+  return server.locals.foods.length
+}
+
 server.get('/api/foods', (request, response) => {
   response.status(200).json(server.locals.foods)
 })
 
 server.get('/api/foods/:id', (request, response) => {
   const searchResult = findFood(request.params.id)
-  console.log(searchResult)
   if (searchResult) {
     return response.status(200).json(searchResult)
   } else {
@@ -63,5 +80,19 @@ server.post('/api/foods', (request, response) => {
       status: 422,
       details: 'Food detail missing'
     })
+  }
+})
+
+server.put('/api/foods/:id', (request, response) => {
+  const newFoodDetails = {name: request.body.name, calories: request.body.calories}  
+  return response.status(200).json(updateFoodItem(newFoodDetails, request.params.id))
+})
+
+server.delete('/api/foods/:id', (request, response) => {
+  const foodCountBeforeDelete = server.locals.foods
+  if (foodCountBeforeDelete - deleteFoodItem(request.params.id)) {
+    return response.sendStatus(200)
+  } else {
+    return response.sendStatus(500)
   }
 })

@@ -121,4 +121,21 @@ describe('QS-Server', () => {
     })
   })
 
+  describe('DELETE /api/foods/:id', () => {
+    before(() => {
+      const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
+      server.locals.foods = [food]
+    })
+    it('should update food with specific ID', (done) => {
+      foodToDelete = server.locals.foods[0]
+      const requestPath = '/api/foods/' + foodToDelete.id
+      this.request.delete(requestPath, (error, response) => {
+        if (error) { done(error) }
+        assert.equal(response.statusCode, 200)
+        assert.equal(server.locals.foods.length, 0)
+        done()
+      })
+    })
+  })
+
 })
