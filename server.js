@@ -36,11 +36,9 @@ server.get('/api/foods', (request, response) => {
 
 server.post('/api/foods', (request, response) => {
   if (request.body.name && request.body.calories){
-    console.log('request.body true')
     const newFoodDetails = {name: request.body.name, calories: request.body.calories}
     return response.status(200).json(addToFoods(newFoodDetails))
   } else {
-    console.log('request.body ELSE')
     return response.status(422).json({
       status: 422,
       details: 'Food detail missing'
