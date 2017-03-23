@@ -1,5 +1,8 @@
 const assert = require('chai').assert
 const request = require('request')
+const environment = process.env.NODE_ENV || 'test'
+const configuration = require('../knexfile')[environment]
+const database = require('knex')(configuration)
 
 const server = require('../server')
 
@@ -25,6 +28,21 @@ describe('QS-Server', () => {
   })
 
   describe('GET /api/foods', () => {
+    beforeEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY')
+
+      database.raw('INSERT INTO foods (name, calories) VALUES (?, ?)', ['test', 111])
+        //   // .then(() => done()))
+          .then(() => {
+            database.raw('SELECT * FROM foods')
+              .then(data => {
+                console.log(data.rowCount)
+              })
+          })
+        .then(() => done())
+        //     done()
+        //   }))
+    })
     it('should return all foods items', (done) => {
       const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
       server.locals.foods = [food]
