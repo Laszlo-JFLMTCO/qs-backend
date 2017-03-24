@@ -37,8 +37,10 @@ describe('QS-Server', () => {
       this.request.get('/api/foods', (error, response) => {
         if (error) { done(error) }
         foods = JSON.parse(response.body)
-        databaseService.returnAllEntries('foods').then(data => {
+        databaseService.returnAllEntries('foods')
+          .then(data => {
             expectedResponse = data.rows
+
             assert.equal(foods.length, 1)
             assert.equal(foods[0].id, expectedResponse[0].id)
             assert.equal(foods[0].name, expectedResponse[0].name)
@@ -50,24 +52,35 @@ describe('QS-Server', () => {
   })
 
   describe('GET /api/foods/:id', () => {
-    before(() => {
-      const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
-      server.locals.foods = [food]
+    beforeEach((done) => {
+      databaseService.clearDatabase().then(() => {
+      databaseService.addToDatabase('foods', 'FoodName', 100)
+        .then(() => done())
+      })
     })
     it('should return details of a single food item for valid id', (done) => {
-      const expectedFood = server.locals.foods[0]
-      const requestPath = '/api/foods/' + expectedFood.id
-      this.request.get(requestPath, (error, response) => {
+      this.request.get('/api/foods/1', (error, response) => {
         if (error) { done(error) }
         returnedFood = JSON.parse(response.body)
-        assert.equal(response.statusCode, 200)
-        assert.equal(returnedFood.id, expectedFood.id)
-        assert.equal(returnedFood.name, expectedFood.name)
-        assert.equal(returnedFood.calories, expectedFood.calories)
+        databaseService.returnOneEntryById('foods', 1)
+          .then(expectedFood => {
+            assert.equal(response.statusCode, 200)
+            assert.equal(returnedFood.id, expectedFood.rows[0].id)
+            assert.equal(returnedFood.name, expectedFood.rows[0].name)
+            assert.equal(returnedFood.calories, expectedFood.rows[0].calories)
+            done()
+          })
+      })
+    })
+    it('should return HTTP status 404 for id not in database', (done) => {
+      const requestPath = '/api/foods/2'
+      this.request.get(requestPath, (error, response) => {
+        if (error) { done(error) }
+        assert.equal(response.statusCode, 404)
         done()
       })
     })
-    it('should return HTTP status 404 for invalid id', (done) => {
+    it('should return HTTP status 404 when string is entered for id', (done) => {
       const requestPath = '/api/foods/invalid'
       this.request.get(requestPath, (error, response) => {
         if (error) { done(error) }

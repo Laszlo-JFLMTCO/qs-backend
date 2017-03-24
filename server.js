@@ -70,11 +70,19 @@ server.get('/api/foods', (request, response) => {
 })
 
 server.get('/api/foods/:id', (request, response) => {
-  const searchResult = findFood(request.params.id)
-  if (searchResult) {
-    return response.status(200).json(searchResult)
+  if (!parseInt(request.params.id)) {
+    response.sendStatus(404)
   } else {
-    return response.sendStatus(404)
+    databaseService.returnOneEntryById('foods', request.params.id)
+      .then(searchResult => {
+        if (searchResult.rowCount > 0) {
+          response.status(200).json(
+            searchResult.rows[0]
+          )
+        } else {
+          response.sendStatus(404)
+        }
+      })
   }
 })
 
