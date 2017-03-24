@@ -29,8 +29,17 @@ function newFood(newFoodDetails, requestedId){
 }
 
 function addToFoods(newFoodDetails){
-  server.locals.foods.push(newFood(newFoodDetails))
-  return server.locals.foods[server.locals.foods.length - 1]
+  databaseService.addToDatabase('foods', newFoodDetails.name, newFoodDetails.calories)
+    .then(() => {
+      databaseService.returnAllEntries('foods').then(data => {
+      });
+      // databaseService.returnLastItem('foods')
+      //   .then(data => {
+      //     console.log('last item:')
+      //     console.log(data)
+      // //     return data.rows[0]
+      //   })
+    })
 }
 
 function findFood(requestedId){
@@ -89,9 +98,9 @@ server.get('/api/foods/:id', (request, response) => {
 server.post('/api/foods', (request, response) => {
   if (request.body.name && request.body.calories){
     const newFoodDetails = {name: request.body.name, calories: request.body.calories}
-    return response.status(200).json(addToFoods(newFoodDetails))
+    response.status(200).json(addToFoods(newFoodDetails))
   } else {
-    return response.status(422).json({
+    response.status(422).json({
       status: 422,
       details: 'Food detail missing'
     })

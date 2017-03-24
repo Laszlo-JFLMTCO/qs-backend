@@ -91,23 +91,27 @@ describe('QS-Server', () => {
   })
 
   describe('POST /api/foods', () => {
-    beforeEach(() => {
-      server.locals.foods = []
+    beforeEach((done) => {
+      databaseService.clearDatabase().then(() => done())
     })
     it('should store the submitted food item', (done) => {
-      const newFood = {name: 'NewName', calories: 'NewCalories'}
+      const newFood = {name: 'NewName', calories: 111}
       this.request.post('/api/foods', {form: newFood}, (error, response) => {
         if (error) { done(error) }
-        const addedToFoods = server.locals.foods[0]
-        assert.equal(response.statusCode, 200)
-        assert.equal(server.locals.foods.length, 1)
-        assert.equal(addedToFoods.name, newFood.name)
-        assert.equal(addedToFoods.calories, newFood.calories)
-        const requestResponse = JSON.parse(response.body)
-        assert.equal(requestResponse.id, addedToFoods.id)
-        assert.equal(requestResponse.name, addedToFoods.name)
-        assert.equal(requestResponse.calories, addedToFoods.calories)
-        done()
+        console.log(response.body)
+        // const requestResponse = JSON.parse(response.body)
+        databaseService.returnAllEntries('foods')
+          .then(foods => {
+            // console.log(foods)
+            assert.equal(response.statusCode, 200)
+            assert.equal(foods.rowCount, 1)
+            assert.equal(foods.rows[0].name, newFood.name)
+            assert.equal(foods.rows[0].calories, newFood.calories)
+            // assert.equal(requestResponse.id, addedToFoods.id)
+            // assert.equal(requestResponse.name, addedToFoods.name)
+            // assert.equal(requestResponse.calories, addedToFoods.calories)
+            done()
+          })
       })
     })
     it('should return JSON with error if food details are missing', (done) => {
