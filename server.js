@@ -1,6 +1,9 @@
 const express = require('express')
 const server = express()
 const bodyParser = require('body-parser')
+const environment = process.env.NODE_ENV || 'development'
+const configuration = require('./knexfile')[environment]
+const database = require('knex')(configuration)
 
 module.exports = server
 
@@ -59,7 +62,11 @@ function deleteFoodItem(requestedId){
 }
 
 server.get('/api/foods', (request, response) => {
-  response.status(200).json(server.locals.foods)
+  database.raw('SELECT * FROM foods').then(data => {
+    response.status(200).json(
+      data.rows
+    )
+  })
 })
 
 server.get('/api/foods/:id', (request, response) => {

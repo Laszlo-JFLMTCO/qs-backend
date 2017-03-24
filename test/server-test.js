@@ -4,11 +4,11 @@ const environment = process.env.NODE_ENV || 'development'
 const configuration = require('../knexfile')[environment]
 const database = require('knex')(configuration)
 
+const databaseService = require('../lib/models/database-service')
+
 const server = require('../server')
 
-function clearDatabase(){
-  return database.raw('TRUNCATE foods RESTART IDENTITY')
-}
+
 
 describe('QS-Server', () => {
   before((done) => {
@@ -33,30 +33,30 @@ describe('QS-Server', () => {
 
   describe('GET /api/foods', () => {
     beforeEach((done) => {
-      // database.raw('TRUNCATE foods RESTART IDENTITY')
-      clearDatabase().then(() => {
-      database.raw('INSERT INTO foods (name, calories) VALUES (?, ?)', ['test', 111])
-          .then(() => {
-            database.raw('SELECT * FROM foods')
-              .then(data => {
-                console.log(data.rowCount)
-              })
-          })
+      databaseService.clearDatabase().then(() => {
+      // database.raw('INSERT INTO foods (name, calories) VALUES (?, ?)', ['FoodName', 100])
+      databaseService.addToDatabase('foods', 'FoodName', 100)
+          // .then(() => {
+          //   database.raw('SELECT * FROM foods')
+          //     .then(data => {
+          //       console.log(data.rowCount)
+          //     })
+          // })
         .then(() => done())
-        // done()
       })
     })
     it('should return all foods items', (done) => {
-      const food = {id: Date.now(), name: 'FoodName', calories: 'FoodCalories'}
-      server.locals.foods = [food]
       this.request.get('/api/foods', (error, response) => {
         if (error) { done(error) }
         foods = JSON.parse(response.body)
-        assert.equal(foods.length, 1)
-        assert.equal(foods[0].id, food.id)
-        assert.equal(foods[0].name, food.name)
-        assert.equal(foods[0].calories, food.calories)
-        done()
+        database.raw('SELECT * FROM foods').then(data => {
+            expectedResponse = data.rows
+            assert.equal(foods.length, 1)
+            assert.equal(foods[0].id, expectedResponse[0].id)
+            assert.equal(foods[0].name, expectedResponse[0].name)
+            assert.equal(foods[0].calories, expectedResponse[0].calories)
+            done()
+          })
       })
     })
   })
