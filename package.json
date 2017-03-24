@@ -7,17 +7,22 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "NODE_ENV=test mocha test/*-test.js",
+    "start": "nodemon server.js",
+    "debug": "NODE_ENV=test mocha debug test/*-test.js"
   },
   "author": "Laszlo Balogh",
   "license": "ISC",
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
+    "nodemon": "^1.11.0",
     "request": "^2.81.0"
   },
   "dependencies": {
     "body-parser": "^1.17.1",
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "knex": "^0.12.9",
+    "pg": "^6.1.5"
   }
 }

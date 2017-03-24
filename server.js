@@ -2,6 +2,8 @@ const express = require('express')
 const server = express()
 const bodyParser = require('body-parser')
 
+const databaseService = require('./lib/models/database-service')
+
 module.exports = server
 
 server.set('port', process.env.PORT || 3000)
@@ -27,8 +29,17 @@ function newFood(newFoodDetails, requestedId){
 }
 
 function addToFoods(newFoodDetails){
-  server.locals.foods.push(newFood(newFoodDetails))
-  return server.locals.foods[server.locals.foods.length - 1]
+  databaseService.addToDatabase('foods', newFoodDetails.name, newFoodDetails.calories)
+    .then(() => {
+      databaseService.returnAllEntries('foods').then(data => {
+      });
+      // databaseService.returnLastItem('foods')
+      //   .then(data => {
+      //     console.log('last item:')
+      //     console.log(data)
+      // //     return data.rows[0]
+      //   })
+    })
 }
 
 function findFood(requestedId){
@@ -59,24 +70,37 @@ function deleteFoodItem(requestedId){
 }
 
 server.get('/api/foods', (request, response) => {
-  response.status(200).json(server.locals.foods)
+  databaseService.returnAllEntries('foods')
+    .then(data => {
+      response.status(200).json(
+        data.rows
+      )
+    })
 })
 
 server.get('/api/foods/:id', (request, response) => {
-  const searchResult = findFood(request.params.id)
-  if (searchResult) {
-    return response.status(200).json(searchResult)
+  if (!parseInt(request.params.id)) {
+    response.sendStatus(404)
   } else {
-    return response.sendStatus(404)
+    databaseService.returnOneEntryById('foods', request.params.id)
+      .then(searchResult => {
+        if (searchResult.rowCount > 0) {
+          response.status(200).json(
+            searchResult.rows[0]
+          )
+        } else {
+          response.sendStatus(404)
+        }
+      })
   }
 })
 
 server.post('/api/foods', (request, response) => {
   if (request.body.name && request.body.calories){
     const newFoodDetails = {name: request.body.name, calories: request.body.calories}
-    return response.status(200).json(addToFoods(newFoodDetails))
+    response.status(200).json(addToFoods(newFoodDetails))
   } else {
-    return response.status(422).json({
+    response.status(422).json({
       status: 422,
       details: 'Food detail missing'
     })
