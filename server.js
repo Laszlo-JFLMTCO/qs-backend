@@ -61,11 +61,12 @@ function deleteFoodItem(requestedId){
 }
 
 server.get('/api/foods', (request, response) => {
-  databaseService.returnAllEntries('foods').then(data => {
-    response.status(200).json(
-      data.rows
-    )
-  })
+  databaseService.returnAllEntries('foods')
+    .then(data => {
+      response.status(200).json(
+        data.rows
+      )
+    })
 })
 
 server.get('/api/foods/:id', (request, response) => {
