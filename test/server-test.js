@@ -1,14 +1,9 @@
 const assert = require('chai').assert
 const request = require('request')
-const environment = process.env.NODE_ENV || 'development'
-const configuration = require('../knexfile')[environment]
-const database = require('knex')(configuration)
 
 const databaseService = require('../lib/models/database-service')
 
 const server = require('../server')
-
-
 
 describe('QS-Server', () => {
   before((done) => {
@@ -34,14 +29,7 @@ describe('QS-Server', () => {
   describe('GET /api/foods', () => {
     beforeEach((done) => {
       databaseService.clearDatabase().then(() => {
-      // database.raw('INSERT INTO foods (name, calories) VALUES (?, ?)', ['FoodName', 100])
       databaseService.addToDatabase('foods', 'FoodName', 100)
-          // .then(() => {
-          //   database.raw('SELECT * FROM foods')
-          //     .then(data => {
-          //       console.log(data.rowCount)
-          //     })
-          // })
         .then(() => done())
       })
     })
@@ -49,7 +37,7 @@ describe('QS-Server', () => {
       this.request.get('/api/foods', (error, response) => {
         if (error) { done(error) }
         foods = JSON.parse(response.body)
-        database.raw('SELECT * FROM foods').then(data => {
+        databaseService.returnAllEntries('foods').then(data => {
             expectedResponse = data.rows
             assert.equal(foods.length, 1)
             assert.equal(foods[0].id, expectedResponse[0].id)
